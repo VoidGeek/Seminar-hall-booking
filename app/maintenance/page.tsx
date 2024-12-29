@@ -22,21 +22,25 @@ const MaintenancePage = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold">Maintenance Request</h1>
-      <textarea
-        value={requestDetails}
-        onChange={(e) => setRequestDetails(e.target.value)}
-        className="mt-4 p-2 border rounded w-full"
-        rows={5}
-        placeholder="Enter maintenance request details"
-      />
-      <button
-        onClick={submitRequest}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Submit Request
-      </button>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-md p-6 bg-var-card-bg text-var-foreground rounded-lg shadow-lg">
+        <h1 className="text-3xl font-semibold text-center mb-6">Maintenance Request</h1>
+
+        <textarea
+          value={requestDetails}
+          onChange={(e) => setRequestDetails(e.target.value)}
+          className="w-full p-4 bg-var-input-bg text-var-foreground border border-var-border rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-var-primary"
+          rows={5}
+          placeholder="Enter maintenance request details"
+        />
+
+        <button
+          onClick={submitRequest}
+          className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+        >
+          Submit Request
+        </button>
+      </div>
     </div>
   );
 };

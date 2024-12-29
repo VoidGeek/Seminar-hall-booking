@@ -2,73 +2,97 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { setIsLoggedIn } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    setError("");
+    setIsLoading(true);
 
-    const data = await response.json();
-    if (response.ok) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Invalid credentials. Please try again.");
+        return;
+      }
+
+      setIsLoggedIn(true);
       router.push("/halls");
-    } else {
-      setError(data.error || "Something went wrong");
+    } catch {
+      setError("An error occurred. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-8 bg-gray-800 p-6 rounded-lg text-white">
-      <h1 className="text-2xl font-semibold text-center mb-4">Login</h1>
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      <form onSubmit={handleSubmit} className="mt-4">
-        <label className="block mb-2">
-          Email:
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-2 p-2 border border-gray-600 bg-gray-700 rounded text-white placeholder-gray-400"
-            placeholder="Enter your email"
-            required
-          />
-        </label>
-        <label className="block mb-2 mt-4">
-          Password:
-          <div className="relative">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-md p-6 rounded-lg shadow-lg card">
+        <h1 className="text-3xl font-bold text-center mb-6">Login</h1>
+        {error && <p className="text-center mb-4 text-var-error">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <label className="block mb-4">
+            <span>Email:</span>
             <input
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-700 rounded text-white placeholder-gray-400"
-              placeholder="Enter your password"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full mt-2 p-3 rounded-lg placeholder-gray-400 border focus:outline-none focus:ring-2 focus:ring-var-primary"
+              placeholder="Enter your email"
               required
+              aria-label="Email"
             />
-            <button
-              type="button"
-              className="absolute inset-y-0 right-2 text-gray-400"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </label>
-        <button
-          type="submit"
-          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600 transition"
-        >
-          Login
-        </button>
-      </form>
+          </label>
+          <label className="block mb-4">
+            <span>Password:</span>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full mt-2 p-3 rounded-lg placeholder-gray-400 border focus:outline-none focus:ring-2 focus:ring-var-primary"
+                placeholder="Enter your password"
+                required
+                aria-label="Password"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-3 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </label>
+          <button
+            type="submit"
+            className={`w-full py-3 font-semibold rounded-lg transition ${
+              isLoading
+                ? "cursor-not-allowed bg-gray-300"
+                : "bg-blue-500 hover:bg-blue-600 text-white"
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

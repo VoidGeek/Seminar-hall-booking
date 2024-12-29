@@ -19,5 +19,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  return NextResponse.json({ message: "Login successful" });
+  // Set the cookie for authentication
+  return NextResponse.json(
+    { message: "Login successful" },
+    {
+      headers: {
+        "Set-Cookie": `auth=true; Path=/; HttpOnly; Secure; SameSite=Strict`,
+      },
+    }
+  );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import HallCard from "@/app/components/HallCard"; // Import the HallCard component
 
 interface Hall {
   _id: string;
@@ -14,7 +15,8 @@ const HallsPage = () => {
   useEffect(() => {
     fetch("/api/halls/list")
       .then((res) => res.json())
-      .then((data: Hall[]) => setHalls(data)); // Explicitly type the fetched data
+      .then((data: Hall[]) => setHalls(data)) // Explicitly type the fetched data
+      .catch((error) => console.error("Failed to fetch halls:", error));
   }, []);
 
   const bookHall = async (hallId: string) => {
@@ -33,26 +35,17 @@ const HallsPage = () => {
       );
     } else {
       const error = await response.json();
-      alert(error.error);
+      alert(error.error || "Failed to book the hall.");
     }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold">Seminar Halls</h1>
-      <ul className="mt-4">
+    <div className="p-6 bg-var-background text-var-foreground min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-center">Seminar Halls</h1>
+      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {halls.map((hall) => (
-          <li key={hall._id} className="flex justify-between p-4 border rounded-lg">
-            <span>{hall.name}</span>
-            <span>{hall.status}</span>
-            {hall.status === "Available" && (
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={() => bookHall(hall._id)}
-              >
-                Book
-              </button>
-            )}
+          <li key={hall._id}>
+            <HallCard hall={hall} bookHall={bookHall} />
           </li>
         ))}
       </ul>

@@ -3,19 +3,71 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #f7fafc; /* Soft light gray for a professional, modern look in light mode */
   --foreground: #171717;
+  --primary: #2563eb;
+  --card-bg: #ffffff; /* Clean white card background for contrast */
+  --input-bg: #ffffff; /* Light background for inputs */
+  --border: #e5e7eb; /* Light border for inputs */
+  --error: #dc2626;
+  --placeholder: #aaa; /* Light placeholder color for light mode */
+  --success: #38a169; /* Success color - green */
+  --info: #3182ce; /* Info color - blue */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  --background: #1f1f1f; /* Dark background resembling Discord's dark mode */
+  --foreground: #dcdfe4; /* Light text for better contrast */
+  --primary: #7289da; /* Discord's brand color */
+  --card-bg: #2f3136; /* Darker card background color */
+  --input-bg: #202225; /* Dark background for inputs */
+  --border: #4f545c; /* Subtle border color */
+  --error: #f85149;
+  --placeholder: #666; /* Darker placeholder color for dark mode */
+  --success: #48bb78; /* Dark mode success color */
+  --info: #63b3ed; /* Dark mode info color */
 }
 
+/* Global Body Styles */
 body {
+  background-color: var(--background);
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden; /* Prevent overflow during animations */
+}
+
+/* Input and Textarea Styles */
+input,
+textarea {
+  background-color: var(--input-bg);
+  color: var(--foreground);
+  border-color: var(--border);
+  placeholder-color: var(--placeholder);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* Button Styles */
+button {
+  color: var(--foreground);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  background-color: #e5e7eb;
+}
+
+/* Card Component */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  transition: background-color 0.3s, border-color 0.3s;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
