@@ -15,16 +15,40 @@ const VolunteersPage = () => {
   useEffect(() => {
     // Fetch the list of volunteers
     fetch("api/volunteers/attendance")
-      .then((res) => res.json())
-      .then((data: Volunteer[] | { error: string }) => {
-        // Check if data is an array
-        if (Array.isArray(data)) {
-          setVolunteers(data);
-        } else {
-          setError("Failed to fetch volunteer data.");
-        }
-      })
-      .catch(() => setError("Failed to fetch volunteer data."));
+  .then((res) => {
+    // Log the status and headers to check for any issues with the response
+    console.log('Response status:', res.status);
+    console.log('Response headers:', res.headers);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`);
+    }
+    return res.json();
+  })
+  .then((data: Volunteer[] | { error: string }) => {
+    // Log the response data for debugging
+    console.log('Response data:', data);
+
+    if (Array.isArray(data)) {
+      setVolunteers(data);
+    } else {
+      setError("Failed to fetch volunteer data.");
+    }
+  })
+  .catch((err) => {
+    // Enhanced error logging
+    console.error("Fetch error:", err);
+
+    // If the error contains specific message, log it
+    if (err.message) {
+      console.error("Error message:", err.message);
+    }
+
+    // Set the error state to display in the UI
+    setError("Failed to fetch volunteer data.");
+  });
+
+
   }, []);
 
   const toggleAttendance = async (volunteerId: string, currentStatus: boolean) => {
