@@ -6,20 +6,22 @@ import { ObjectId } from "mongodb"; // Make sure you have mongodb installed
 // Helper to validate MongoDB ObjectId
 const isValidObjectId = (id: string): boolean => ObjectId.isValid(id);
 
-// Helper function to handle CORS
-const handleCors = () => {
+// Helper function to handle CORS, adjusting for Vercel's environment
+const handleCors = (req: Request): Headers => {
   const headers = new Headers();
-  headers.set("Access-Control-Allow-Origin", "*"); // Adjust as needed
-  headers.set("Access-Control-Allow-Methods", "GET, POST");
+  const origin = req.headers.get('origin') || '*'; // Get the origin from the request
+
+  headers.set("Access-Control-Allow-Origin", origin); // Allow the origin of the request
+  headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // Add OPTIONS for preflight
   headers.set("Access-Control-Allow-Headers", "Content-Type");
 
   return headers;
 };
 
 // GET: Fetch all volunteers and their attendance status
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const headers = handleCors();
+    const headers = handleCors(req); // Apply CORS settings
 
     await dbConnect();
     const volunteers = await Volunteer.find(); // Fetch all volunteers
@@ -42,7 +44,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid or missing volunteer ID" }, { status: 400 });
     }
 
-    const headers = handleCors();
+    const headers = handleCors(req); // Apply CORS settings
 
     await dbConnect();
 
