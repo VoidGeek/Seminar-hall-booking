@@ -11,7 +11,7 @@ const Navbar = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to track menu visibility
   const [isScrolled, setIsScrolled] = useState(false); // State to track scroll position
-  const router = useRouter();
+  const router = useRouter(); // This is the correct usage in Next.js 13+ App Router
 
   const handleLogout = async () => {
     const response = await fetch("/api/auth/logout", {
@@ -20,7 +20,7 @@ const Navbar = () => {
 
     if (response.ok) {
       setIsLoggedIn(false);
-      router.push("/login");
+      router.push("/login"); // Navigate to login page
     } else {
       alert("Logout failed. Please try again.");
     }
