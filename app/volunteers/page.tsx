@@ -14,7 +14,7 @@ const VolunteersPage = () => {
 
   useEffect(() => {
     // Fetch the list of volunteers
-    fetch("/api/volunteers/attendance")
+    fetch("api/volunteers/attendance")
       .then((res) => res.json())
       .then((data: Volunteer[] | { error: string }) => {
         // Check if data is an array
