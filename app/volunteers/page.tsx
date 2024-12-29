@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { useEffect, useState } from "react";
 
 interface Volunteer {
@@ -17,7 +16,14 @@ const VolunteersPage = () => {
     // Fetch the list of volunteers
     fetch("/api/volunteers/attendance")
       .then((res) => res.json())
-      .then((data: Volunteer[]) => setVolunteers(data))
+      .then((data: Volunteer[] | { error: string }) => {
+        // Check if data is an array
+        if (Array.isArray(data)) {
+          setVolunteers(data);
+        } else {
+          setError("Failed to fetch volunteer data.");
+        }
+      })
       .catch(() => setError("Failed to fetch volunteer data."));
   }, []);
 
