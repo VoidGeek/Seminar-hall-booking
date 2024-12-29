@@ -5,7 +5,7 @@ import Maintenance from "@/models/Maintenance";
 
 export async function DELETE(req: Request) {
   // Extract bookingId from the request body
-  const { bookingId } = await req.json();
+  const { bookingId } = await req.json(); // Parse the JSON body to get the bookingId
 
   // Check if bookingId is provided
   if (!bookingId) {

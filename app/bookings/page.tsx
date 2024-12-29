@@ -30,16 +30,21 @@ const BookingsPage = () => {
   }, []);
 
   const handleDelete = async (bookingId: string) => {
-    const response = await fetch(`/api/bookings/${bookingId}`, {
+    const response = await fetch(`/api/bookings`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json", // Set content type as JSON
+      },
+      body: JSON.stringify({ bookingId }), // Send bookingId in the request body as JSON
     });
-
+  
     if (response.ok) {
       setBookings(bookings.filter((booking) => booking._id !== bookingId));
     } else {
       setError("Failed to delete the booking.");
     }
   };
+  
 
   if (!isLoggedIn) {
     return (
@@ -61,7 +66,6 @@ const BookingsPage = () => {
             <tr>
               <th className="py-3 px-4 border-b text-left text-sm font-semibold">Booking ID</th>
               <th className="py-3 px-4 border-b text-left text-sm font-semibold">Hall Name</th>
-              <th className="py-3 px-4 border-b text-left text-sm font-semibold">Hall Location</th>
               <th className="py-3 px-4 border-b text-left text-sm font-semibold">User</th>
               <th className="py-3 px-4 border-b text-left text-sm font-semibold">Booking Date</th>
               <th className="py-3 px-4 border-b text-left text-sm font-semibold">Actions</th>
@@ -73,7 +77,6 @@ const BookingsPage = () => {
                 <tr key={booking._id} className="hover:bg-gray-50">
                   <td className="py-3 px-4 border-b text-sm">{booking._id}</td>
                   <td className="py-3 px-4 border-b text-sm">{booking.hall_id.name}</td> {/* Display Hall Name */}
-                  <td className="py-3 px-4 border-b text-sm">{booking.hall_id.location}</td> {/* Display Hall Location */}
                   <td className="py-3 px-4 border-b text-sm">{booking.nameuser}</td>
                   <td className="py-3 px-4 border-b text-sm">{new Date(booking.date).toLocaleDateString()}</td>
                   <td className="py-3 px-4 border-b text-sm">
