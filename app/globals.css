@@ -71,3 +71,73 @@ button:disabled {
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
+
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--card-bg);
+  color: var(--foreground);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+th,
+td {
+  padding: 12px 16px;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+
+th {
+  background-color: var(--primary);
+  color: white;
+}
+
+tr {
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover {
+  background-color: var(--info);
+  transition: background-color 0.3s;
+}
+
+/* Fix dark mode row hover */
+[data-theme="dark"] tr:hover {
+  background-color: var(--primary); /* Use primary color for dark mode hover effect */
+  transition: background-color 0.3s;
+}
+
+/* Sun and Moon Icon Fix (if toggling theme) */
+[data-theme="dark"] .moon-icon {
+  display: none;
+}
+
+[data-theme="light"] .sun-icon {
+  display: none;
+}
+
+/* Button Styling for Table */
+button {
+  padding: 8px 16px;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button.bg-green-500 {
+  background-color: var(--success);
+  color: white;
+}
+
+button.bg-red-500 {
+  background-color: var(--error);
+  color: white;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+}

@@ -18,6 +18,14 @@ export default function RootLayout({
     (function() {
       const storedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', storedTheme);
+
+      // Set the initial toggle icon based on the theme
+      const toggleButton = document.querySelector('#theme-toggle-button');
+      if (storedTheme === 'dark' && toggleButton) {
+        toggleButton.setAttribute('aria-pressed', 'true');
+      } else if (toggleButton) {
+        toggleButton.setAttribute('aria-pressed', 'false');
+      }
     })();
   `;
 

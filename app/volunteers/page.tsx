@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import { useEffect, useState } from "react";
 
 interface Volunteer {
@@ -11,130 +12,254 @@ interface Volunteer {
 const VolunteersPage = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [error, setError] = useState("");
+  const [newVolunteer, setNewVolunteer] = useState<Volunteer>({
+    _id: "",
+    name: "",
+    event: "",
+    attendance: false, // Default attendance is set to false (Absent)
+  });
+
+  const [editVolunteer, setEditVolunteer] = useState<Volunteer | null>(null); // For editing volunteer
 
   useEffect(() => {
     // Fetch the list of volunteers
-    fetch("api/volunteers/attendance")
-  .then((res) => {
-    // Log the status and headers to check for any issues with the response
-    console.log('Response status:', res.status);
-    console.log('Response headers:', res.headers);
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
-    return res.json();
-  })
-  .then((data: Volunteer[] | { error: string }) => {
-    // Log the response data for debugging
-    console.log('Response data:', data);
-
-    if (Array.isArray(data)) {
-      setVolunteers(data);
-    } else {
-      setError("Failed to fetch volunteer data.");
-    }
-  })
-  .catch((err) => {
-    // Enhanced error logging
-    console.error("Fetch error:", err);
-
-    // If the error contains specific message, log it
-    if (err.message) {
-      console.error("Error message:", err.message);
-    }
-
-    // Set the error state to display in the UI
-    setError("Failed to fetch volunteer data.");
-  });
-
-
+    fetch("/api/volunteers/attendance")
+      .then((res) => res.json())
+      .then((data: Volunteer[]) => setVolunteers(data))
+      .catch(() => setError("Failed to fetch volunteer data."));
   }, []);
 
-  const toggleAttendance = async (volunteerId: string, currentStatus: boolean) => {
+  // Update attendance for a volunteer
+  const updateAttendance = async (volunteerId: string, attendance: boolean) => {
     const response = await fetch("/api/volunteers/attendance", {
-      method: "POST",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ volunteerId, attendance: !currentStatus }),
+      body: JSON.stringify({ volunteerId, attendance }),
     });
 
     if (response.ok) {
       setVolunteers(
         volunteers.map((volunteer) =>
           volunteer._id === volunteerId
-            ? { ...volunteer, attendance: !currentStatus }
+            ? { ...volunteer, attendance }
             : volunteer
         )
       );
-      alert(
-        `Attendance updated: ${
-          !currentStatus ? "Marked Present" : "Marked Absent"
-        }.`
-      );
+      alert("Attendance updated successfully.");
     } else {
       const errorData = await response.json();
       alert(errorData.error || "Failed to update attendance.");
     }
   };
 
+  // Add a new volunteer
+  const handleAddVolunteer = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const response = await fetch("/api/volunteers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newVolunteer),
+    });
+
+    if (response.ok) {
+      setNewVolunteer({ _id: "", name: "", event: "", attendance: false }); // Reset form
+      alert("Volunteer added successfully.");
+      window.location.reload(); // Reload the page after adding a volunteer
+    } else {
+      const errorData = await response.json();
+      alert(errorData.error || "Failed to add volunteer.");
+    }
+  };
+
+  // Delete a volunteer
+  const handleDeleteVolunteer = async (volunteerId: string) => {
+    const response = await fetch("/api/volunteers", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ volunteerId }),
+    });
+
+    if (response.ok) {
+      setVolunteers(volunteers.filter((volunteer) => volunteer._id !== volunteerId));
+      alert("Volunteer deleted successfully.");
+    } else {
+      const errorData = await response.json();
+      alert(errorData.error || "Failed to delete volunteer.");
+    }
+  };
+
+  // Handle form submission for updating a volunteer's details
+  const handleUpdateVolunteer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editVolunteer) return;
+  
+    const { _id, name, event } = editVolunteer;
+  
+    const response = await fetch("/api/volunteers", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        volunteerId: _id,
+        name,
+        event
+      }),
+    });
+  
+    if (response.ok) {
+      setVolunteers(
+        volunteers.map((volunteer) =>
+          volunteer._id === _id ? { ...editVolunteer } : volunteer
+        )
+      );
+      setEditVolunteer(null); // Reset the edit form
+      alert("Volunteer updated successfully.");
+    } else {
+      const errorData = await response.json();
+      alert(errorData.error || "Failed to update volunteer.");
+    }
+  };
+  
+  // Set the volunteer to be edited
+  const handleEditVolunteer = (volunteer: Volunteer) => {
+    setEditVolunteer(volunteer); // Set the volunteer to be edited
+  };
+
   return (
-    <div className="p-6 min-h-screen" style={{ backgroundColor: "var(--background)" }}>
-      <h1
-        className="text-3xl font-bold mb-6 text-center"
-        style={{ color: "var(--foreground)" }}
-      >
-        Volunteer Attendance
-      </h1>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-4xl font-bold text-center mb-6">Volunteer Attendance</h1>
       {error && <p className="text-red-500 text-center">{error}</p>}
-      <ul>
-        {volunteers.map((volunteer) => (
-          <li
-            key={volunteer._id}
-            className="flex justify-between items-center p-4 border rounded-lg mb-4"
-            style={{
-              backgroundColor: "var(--card-bg)",
-              borderColor: "var(--border)",
-            }}
+
+      {/* Form to add new volunteer */}
+      <form onSubmit={handleAddVolunteer} className="mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="name" className="block text-lg font-medium">Name</label>
+            <input
+              id="name"
+              type="text"
+              value={newVolunteer.name}
+              onChange={(e) => setNewVolunteer({ ...newVolunteer, name: e.target.value })}
+              className="mt-2 p-2 border border-gray-300 rounded-md w-full"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="event" className="block text-lg font-medium">Event</label>
+            <input
+              id="event"
+              type="text"
+              value={newVolunteer.event}
+              onChange={(e) => setNewVolunteer({ ...newVolunteer, event: e.target.value })}
+              className="mt-2 p-2 border border-gray-300 rounded-md w-full"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 text-center">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600"
           >
-            <div>
-              <p
-                className="font-semibold"
-                style={{ color: "var(--foreground)" }}
-              >
-                {volunteer.name}
-              </p>
-              <p className="text-gray-400" style={{ color: "var(--secondary)" }}>
-                Event: {volunteer.event}
-              </p>
-              <p className="text-gray-300" style={{ color: "var(--foreground)" }}>
-                Attendance:{" "}
-                <span
-                  className={`${
-                    volunteer.attendance ? "text-green-400" : "text-red-400"
-                  }`}
+            Add Volunteer
+          </button>
+        </div>
+      </form>
+
+      {/* Table for displaying volunteers */}
+      <div className="overflow-x-auto">
+  <table className="min-w-full table-auto sm:table-fixed">
+    <thead>
+      <tr>
+        <th className="px-4 py-2 text-left">Name</th>
+        <th className="px-4 py-2 text-left">Event</th>
+        <th className="px-4 py-2 text-left">Attendance</th>
+        <th className="px-4 py-2 text-left">Attendance Actions</th>
+        <th className="px-4 py-2 text-left">Edit/Delete Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {volunteers.map((volunteer) => (
+        <tr key={volunteer._id} className="border-b hover:bg-gray-50 transition-colors">
+          {editVolunteer && editVolunteer._id === volunteer._id ? (
+            <>
+              <td className="px-4 py-2">
+                <input
+                  type="text"
+                  value={editVolunteer.name}
+                  onChange={(e) => setEditVolunteer({ ...editVolunteer, name: e.target.value })}
+                  className="p-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </td>
+              <td className="px-4 py-2">
+                <input
+                  type="text"
+                  value={editVolunteer.event}
+                  onChange={(e) => setEditVolunteer({ ...editVolunteer, event: e.target.value })}
+                  className="p-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </td>
+              <td className="px-4 py-2">{volunteer.attendance ? "Present" : "Absent"}</td>
+              <td className="px-4 py-2">
+                <div className="flex space-x-2">
+                  <button
+                    className="px-4 py-1 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600"
+                    onClick={handleUpdateVolunteer}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="px-4 py-1 bg-gray-500 text-white rounded-md font-semibold hover:bg-gray-600"
+                    onClick={() => setEditVolunteer(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </>
+          ) : (
+            <>
+              <td className="px-4 py-2">{volunteer.name}</td>
+              <td className="px-4 py-2">{volunteer.event}</td>
+              <td className="px-4 py-2">
+                {volunteer.attendance ? "Present" : "Absent"}
+              </td>
+              <td className="px-4 py-2">
+                <button
+                  className={`px-4 py-1 rounded-md font-semibold ${
+                    volunteer.attendance ? "bg-red-500" : "bg-green-500"
+                  } text-white`}
+                  onClick={() => updateAttendance(volunteer._id, !volunteer.attendance)}
                 >
-                  {volunteer.attendance ? "Present" : "Absent"}
-                </span>
-              </p>
-            </div>
-            <button
-              className={`px-4 py-2 rounded font-semibold transition ${
-                volunteer.attendance
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "bg-green-500 hover:bg-green-600 text-white"
-              }`}
-              onClick={() => toggleAttendance(volunteer._id, volunteer.attendance)}
-              style={{
-                backgroundColor: volunteer.attendance
-                  ? "var(--error)"
-                  : "var(--primary)",
-              }}
-            >
-              {volunteer.attendance ? "Mark Absent" : "Mark Present"}
-            </button>
-          </li>
-        ))}
-      </ul>
+                  {volunteer.attendance ? "Mark Absent" : "Mark Present"}
+                </button>
+              </td>
+              <td className="px-4 py-2 flex space-x-2">
+                <button
+                  className="px-4 py-1 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600"
+                  onClick={() => handleEditVolunteer(volunteer)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="px-4 py-1 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
+                  onClick={() => handleDeleteVolunteer(volunteer._id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </>
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
 };

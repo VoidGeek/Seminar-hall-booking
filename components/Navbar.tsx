@@ -1,17 +1,18 @@
-"use client";
-
+"use client"
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { useState, useEffect } from "react";
 
 const Navbar = () => {
   const { isLoggedIn, setIsLoggedIn } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to track menu visibility
-  const [isScrolled, setIsScrolled] = useState(false); // State to track scroll position
-  const router = useRouter(); // This is the correct usage in Next.js 13+ App Router
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
+  const [isAuthButtonLoaded, setIsAuthButtonLoaded] = useState(false);
+  const router = useRouter();
 
   const handleLogout = async () => {
     const response = await fetch("/api/auth/logout", {
@@ -20,7 +21,9 @@ const Navbar = () => {
 
     if (response.ok) {
       setIsLoggedIn(false);
-      router.push("/login"); // Navigate to login page
+      document.cookie = "isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      localStorage.setItem("isLoggedIn", "false");
+      router.push("/login");
     } else {
       alert("Logout failed. Please try again.");
     }
@@ -29,59 +32,41 @@ const Navbar = () => {
   const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
     const rect = button.getBoundingClientRect();
-
-    // Determine the new theme
     const newTheme = isDarkMode ? "light" : "dark";
-
-    // Dynamically set the animation origin
-    document.body.style.setProperty(
-      "--toggle-x",
-      `${rect.left + rect.width / 2}px`
-    );
-    document.body.style.setProperty(
-      "--toggle-y",
-      `${rect.top + rect.height / 2}px`
-    );
-
-    // Pre-set background color for the circular reveal to match the next theme
-    const nextBackground = newTheme === "dark" ? "#0d1117" : "#ffffff"; // Update as per your theme colors
+    document.body.style.setProperty("--toggle-x", `${rect.left + rect.width / 2}px`);
+    document.body.style.setProperty("--toggle-y", `${rect.top + rect.height / 2}px`);
+    const nextBackground = newTheme === "dark" ? "#0d1117" : "#ffffff";
     document.body.style.setProperty("--reveal-bg", nextBackground);
-
-    // Add animation class to trigger the circular reveal
     document.body.classList.add("theme-reveal");
 
-    // Begin theme change after the animation completes
     setTimeout(() => {
-      // Update the theme after animation ends
       document.documentElement.setAttribute("data-theme", newTheme);
-      toggleTheme(); // Update internal theme state
-      document.body.classList.remove("theme-reveal"); // Remove animation class
-    }, 600); // Matches animation duration
+      toggleTheme();
+      document.body.classList.remove("theme-reveal");
+      localStorage.setItem("theme", newTheme);
+    }, 600);
   };
 
-  // Handle closing the menu with a delay after a link is clicked
-  const handleLinkClick = () => {
-    setTimeout(() => {
-      setIsMenuOpen(false); // Close menu after link is clicked
-    }, 500); // Delay the closing to allow the page transition
-  };
-
-  // Effect to detect scroll position
   useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+    setIsLoggedIn(loggedIn);
+
+    setIsThemeLoaded(true);
+    setIsAuthButtonLoaded(true); 
+
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setIsScrolled(true); // Set the state when scroll position is greater than 50px
+        setIsScrolled(true);
       } else {
-        setIsScrolled(false); // Reset state when scroll position is less than 50px
+        setIsScrolled(false);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [setIsLoggedIn]);
 
   return (
     <nav
@@ -125,7 +110,7 @@ const Navbar = () => {
             isDarkMode ? "text-gray-100" : "text-gray-900"
           }`}
         >
-          <Link href="/" className="hover:text-gray-500" onClick={handleLinkClick}>
+          <Link href="/" className="hover:text-gray-500">
             Home
           </Link>
         </li>
@@ -134,7 +119,7 @@ const Navbar = () => {
             isDarkMode ? "text-gray-100" : "text-gray-900"
           }`}
         >
-          <Link href="/halls" className="hover:text-gray-500" onClick={handleLinkClick}>
+          <Link href="/halls" className="hover:text-gray-500">
             Halls
           </Link>
         </li>
@@ -143,7 +128,7 @@ const Navbar = () => {
             isDarkMode ? "text-gray-100" : "text-gray-900"
           }`}
         >
-          <Link href="/maintenance" className="hover:text-gray-500" onClick={handleLinkClick}>
+          <Link href="/maintenance" className="hover:text-gray-500">
             Maintenance
           </Link>
         </li>
@@ -152,7 +137,7 @@ const Navbar = () => {
             isDarkMode ? "text-gray-100" : "text-gray-900"
           }`}
         >
-          <Link href="/volunteers" className="hover:text-gray-500" onClick={handleLinkClick}>
+          <Link href="/volunteers" className="hover:text-gray-500">
             Volunteers
           </Link>
         </li>
@@ -172,28 +157,28 @@ const Navbar = () => {
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"} mt-12`}
         >
-          <Link href="/" className="hover:text-gray-900" onClick={handleLinkClick}>
+          <Link href="/" className="hover:text-gray-900">
             Home
           </Link>
         </li>
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
         >
-          <Link href="/halls" className="hover:text-gray-900" onClick={handleLinkClick}>
+          <Link href="/halls" className="hover:text-gray-900">
             Halls
           </Link>
         </li>
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
         >
-          <Link href="/maintenance" className="hover:text-gray-900" onClick={handleLinkClick}>
+          <Link href="/maintenance" className="hover:text-gray-900">
             Maintenance
           </Link>
         </li>
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
         >
-          <Link href="/volunteers" className="hover:text-gray-900" onClick={handleLinkClick}>
+          <Link href="/volunteers" className="hover:text-gray-900">
             Volunteers
           </Link>
         </li>
@@ -210,22 +195,25 @@ const Navbar = () => {
         </li>
       </ul>
 
-      {/* Theme Toggle Button */}
+      {/* Buttons - Theme Toggle and Login/Logout */}
       <div className="flex items-center space-x-4 mt-4 md:mt-0">
-        <button
-          onClick={handleToggle}
-          className="relative w-10 h-10 flex items-center justify-center bg-gray-800 text-white rounded-full focus:outline-none overflow-hidden"
-          aria-label="Toggle Theme"
-        >
-          {/* Sun/Moon Icons */}
-          {isDarkMode ? (
-            <svg
+        {/* Theme Toggle Button */}
+        {isThemeLoaded && (
+          <button
+            id="theme-toggle-button"
+            onClick={handleToggle}
+            className="relative w-12 h-12 flex items-center justify-center bg-gray-800 text-white rounded-full focus:outline-none overflow-hidden"
+            aria-label="Toggle Theme"
+          >
+            {/* Sun/Moon Icons */}
+            {isDarkMode ? (
+              <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6"
+              className="w-12 h-12"  
             >
               <path
                 strokeLinecap="round"
@@ -233,39 +221,45 @@ const Navbar = () => {
                 d="M12 3v1.5M16.95 7.05l1.06 1.06M21 12h-1.5M16.95 16.95l-1.06 1.06M12 21v-1.5M7.05 16.95l-1.06-1.06M3 12h1.5M7.05 7.05L8.11 8.11"
               />
             </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"
-              />
-            </svg>
-          )}
-        </button>
+            
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"
+                />
+              </svg>
+            )}
+          </button>
+        )}
 
         {/* Login/Logout Button */}
-        {isLoggedIn ? (
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 px-4 py-2 rounded hover:bg-red-600 transition"
-          >
-            Logout
-          </button>
-        ) : (
-          <Link
-            href="/login"
-            className="bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition"
-          >
-            Login
-          </Link>
+        {isAuthButtonLoaded && (
+          <div>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 px-4 py-2 rounded hover:bg-red-600 transition"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition"
+              >
+                Login
+              </Link>
+            )}
+          </div>
         )}
       </div>
     </nav>

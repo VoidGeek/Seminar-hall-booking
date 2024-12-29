@@ -17,21 +17,26 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
+  
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
+  
       if (!response.ok) {
         const data = await response.json();
         setError(data.error || "Invalid credentials. Please try again.");
         return;
       }
-
+  
+      // Set isLoggedIn state to true
       setIsLoggedIn(true);
+  
+      // Store logged-in state in localStorage
+      localStorage.setItem("isLoggedIn", "true");
+  
       router.push("/halls");
     } catch {
       setError("An error occurred. Please check your connection and try again.");
@@ -39,7 +44,7 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md p-6 rounded-lg shadow-lg card">
