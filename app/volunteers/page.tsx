@@ -2,21 +2,24 @@
 
 import { useEffect, useState } from "react";
 
+// Define the types for the Volunteer and Options
 interface Volunteer {
   _id: string;
   name: string;
   event: string;
   attendance: boolean;
+  usn: string; // Added USN field
 }
 
 const VolunteersPage = () => {
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [newVolunteer, setNewVolunteer] = useState<Volunteer>({
     _id: "",
     name: "",
     event: "",
-    attendance: false, // Default attendance is set to false (Absent)
+    attendance: false,
+    usn: "", // Default USN field
   });
 
   const [editVolunteer, setEditVolunteer] = useState<Volunteer | null>(null); // For editing volunteer
@@ -63,7 +66,13 @@ const VolunteersPage = () => {
     });
 
     if (response.ok) {
-      setNewVolunteer({ _id: "", name: "", event: "", attendance: false }); // Reset form
+      setNewVolunteer({
+        _id: "",
+        name: "",
+        event: "",
+        attendance: false,
+        usn: "", // Reset USN field
+      }); // Reset form
       alert("Volunteer added successfully.");
       window.location.reload(); // Reload the page after adding a volunteer
     } else {
@@ -94,7 +103,7 @@ const VolunteersPage = () => {
     e.preventDefault();
     if (!editVolunteer) return;
   
-    const { _id, name, event } = editVolunteer;
+    const { _id, name, event, usn } = editVolunteer;
   
     const response = await fetch("/api/volunteers", {
       method: "PATCH",
@@ -102,7 +111,8 @@ const VolunteersPage = () => {
       body: JSON.stringify({
         volunteerId: _id,
         name,
-        event
+        event,
+        usn, // Include USN for updating
       }),
     });
   
@@ -146,6 +156,18 @@ const VolunteersPage = () => {
           </div>
 
           <div>
+            <label htmlFor="usn" className="block text-lg font-medium">USN</label>
+            <input
+              id="usn"
+              type="text"
+              value={newVolunteer.usn}
+              onChange={(e) => setNewVolunteer({ ...newVolunteer, usn: e.target.value })}
+              className="mt-2 p-2 border border-gray-300 rounded-md w-full"
+              required
+            />
+          </div>
+
+          <div>
             <label htmlFor="event" className="block text-lg font-medium">Event</label>
             <input
               id="event"
@@ -170,96 +192,106 @@ const VolunteersPage = () => {
 
       {/* Table for displaying volunteers */}
       <div className="overflow-x-auto">
-  <table className="min-w-full table-auto sm:table-fixed">
-    <thead>
-      <tr>
-        <th className="px-4 py-2 text-left">Name</th>
-        <th className="px-4 py-2 text-left">Event</th>
-        <th className="px-4 py-2 text-left">Attendance</th>
-        <th className="px-4 py-2 text-left">Attendance Actions</th>
-        <th className="px-4 py-2 text-left">Edit/Delete Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {volunteers.map((volunteer) => (
-        <tr key={volunteer._id} className="border-b hover:bg-gray-50 transition-colors">
-          {editVolunteer && editVolunteer._id === volunteer._id ? (
-            <>
-              <td className="px-4 py-2">
-                <input
-                  type="text"
-                  value={editVolunteer.name}
-                  onChange={(e) => setEditVolunteer({ ...editVolunteer, name: e.target.value })}
-                  className="p-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </td>
-              <td className="px-4 py-2">
-                <input
-                  type="text"
-                  value={editVolunteer.event}
-                  onChange={(e) => setEditVolunteer({ ...editVolunteer, event: e.target.value })}
-                  className="p-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </td>
-              <td className="px-4 py-2">{volunteer.attendance ? "Present" : "Absent"}</td>
-              <td className="px-4 py-2">
-                <div className="flex space-x-2">
-                  <button
-                    className="px-4 py-1 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600"
-                    onClick={handleUpdateVolunteer}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="px-4 py-1 bg-gray-500 text-white rounded-md font-semibold hover:bg-gray-600"
-                    onClick={() => setEditVolunteer(null)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </td>
-            </>
-          ) : (
-            <>
-              <td className="px-4 py-2">{volunteer.name}</td>
-              <td className="px-4 py-2">{volunteer.event}</td>
-              <td className="px-4 py-2">
-                {volunteer.attendance ? "Present" : "Absent"}
-              </td>
-              <td className="px-4 py-2">
-                <button
-                  className={`px-4 py-1 rounded-md font-semibold ${
-                    volunteer.attendance ? "bg-red-500" : "bg-green-500"
-                  } text-white`}
-                  onClick={() => updateAttendance(volunteer._id, !volunteer.attendance)}
-                >
-                  {volunteer.attendance ? "Mark Absent" : "Mark Present"}
-                </button>
-              </td>
-              <td className="px-4 py-2 flex space-x-2">
-                <button
-                  className="px-4 py-1 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600"
-                  onClick={() => handleEditVolunteer(volunteer)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="px-4 py-1 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
-                  onClick={() => handleDeleteVolunteer(volunteer._id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </>
-          )}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
+        <table className="min-w-full table-auto sm:table-fixed">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left">Name</th>
+              <th className="px-4 py-2 text-left">USN</th> {/* Display USN First */}
+              <th className="px-4 py-2 text-left">Event</th>
+              <th className="px-4 py-2 text-left">Attendance</th>
+              <th className="px-4 py-2 text-left">Attendance Actions</th>
+              <th className="px-4 py-2 text-left">Edit/Delete Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {volunteers.map((volunteer) => (
+              <tr key={volunteer._id} className="border-b hover:bg-gray-50 transition-colors">
+                {editVolunteer && editVolunteer._id === volunteer._id ? (
+                  <>
+                    <td className="px-4 py-2">
+                      <input
+                        type="text"
+                        value={editVolunteer.name}
+                        onChange={(e) => setEditVolunteer({ ...editVolunteer, name: e.target.value })}
+                        className="p-2 border border-gray-300 rounded-md"
+                        required
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="text"
+                        value={editVolunteer.usn}
+                        onChange={(e) => setEditVolunteer({ ...editVolunteer, usn: e.target.value })}
+                        className="p-2 border border-gray-300 rounded-md"
+                        required
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="text"
+                        value={editVolunteer.event}
+                        onChange={(e) => setEditVolunteer({ ...editVolunteer, event: e.target.value })}
+                        className="p-2 border border-gray-300 rounded-md"
+                        required
+                      />
+                    </td>
+                    <td className="px-4 py-2">{volunteer.attendance ? "Present" : "Absent"}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex space-x-2">
+                        <button
+                          className="px-4 py-1 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600"
+                          onClick={handleUpdateVolunteer}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-4 py-1 bg-gray-500 text-white rounded-md font-semibold hover:bg-gray-600"
+                          onClick={() => setEditVolunteer(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="px-4 py-2">{volunteer.name}</td>
+                    <td className="px-4 py-2">{volunteer.usn}</td> {/* Display USN */}
+                    <td className="px-4 py-2">{volunteer.event}</td>
+                    <td className="px-4 py-2">
+                      {volunteer.attendance ? "Present" : "Absent"}
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        className={`px-4 py-1 rounded-md font-semibold ${
+                          volunteer.attendance ? "bg-red-500" : "bg-green-500"
+                        } text-white`}
+                        onClick={() => updateAttendance(volunteer._id, !volunteer.attendance)}
+                      >
+                        {volunteer.attendance ? "Mark Absent" : "Mark Present"}
+                      </button>
+                    </td>
+                    <td className="px-4 py-2 flex space-x-2">
+                      <button
+                        className="px-4 py-1 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600"
+                        onClick={() => handleEditVolunteer(volunteer)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="px-4 py-1 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600"
+                        onClick={() => handleDeleteVolunteer(volunteer._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

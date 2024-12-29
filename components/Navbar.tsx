@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -141,6 +142,30 @@ const Navbar = () => {
             Volunteers
           </Link>
         </li>
+
+        {/* Only show if logged in */}
+        {isLoggedIn && (
+          <>
+            <li
+              className={`text-xl md:text-sm ${
+                isDarkMode ? "text-gray-100" : "text-gray-900"
+              }`}
+            >
+              <Link href="/requests" className="hover:text-gray-500">
+                Requests
+              </Link>
+            </li>
+            <li
+              className={`text-xl md:text-sm ${
+                isDarkMode ? "text-gray-100" : "text-gray-900"
+              }`}
+            >
+              <Link href="/bookings" className="hover:text-gray-500">
+                Bookings
+              </Link>
+            </li>
+          </>
+        )}
       </ul>
 
       {/* Mobile Slide-In Menu */}
@@ -157,31 +182,91 @@ const Navbar = () => {
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"} mt-12`}
         >
-          <Link href="/" className="hover:text-gray-900">
+          <Link
+            href="/"
+            className="hover:text-gray-900"
+            onClick={() => {
+              // Add a delay to close the menu
+              setTimeout(() => setIsMenuOpen(false), 500); // 500ms delay
+            }}
+          >
             Home
           </Link>
         </li>
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
         >
-          <Link href="/halls" className="hover:text-gray-900">
+          <Link
+            href="/halls"
+            className="hover:text-gray-900"
+            onClick={() => {
+              // Add a delay to close the menu
+              setTimeout(() => setIsMenuOpen(false), 500); // 500ms delay
+            }}
+          >
             Halls
           </Link>
         </li>
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
         >
-          <Link href="/maintenance" className="hover:text-gray-900">
+          <Link
+            href="/maintenance"
+            className="hover:text-gray-900"
+            onClick={() => {
+              // Add a delay to close the menu
+              setTimeout(() => setIsMenuOpen(false), 500); // 500ms delay
+            }}
+          >
             Maintenance
           </Link>
         </li>
         <li
           className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
         >
-          <Link href="/volunteers" className="hover:text-gray-900">
+          <Link
+            href="/volunteers"
+            className="hover:text-gray-900"
+            onClick={() => {
+              // Add a delay to close the menu
+              setTimeout(() => setIsMenuOpen(false), 500); // 500ms delay
+            }}
+          >
             Volunteers
           </Link>
         </li>
+
+        {/* Only show if logged in */}
+        {isLoggedIn && (
+          <>
+            <li
+              className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
+            >
+              <Link
+                href="/requests"
+                className="hover:text-gray-900"
+                onClick={() => {
+                  setTimeout(() => setIsMenuOpen(false), 500);
+                }}
+              >
+                Requests
+              </Link>
+            </li>
+            <li
+              className={`text-xl ${isDarkMode ? "text-gray-100" : "text-gray-900"}`}
+            >
+              <Link
+                href="/bookings"
+                className="hover:text-gray-900"
+                onClick={() => {
+                  setTimeout(() => setIsMenuOpen(false), 500);
+                }}
+              >
+                Bookings
+              </Link>
+            </li>
+          </>
+        )}
 
         {/* Close Button */}
         <li className="absolute top-4 right-4">
@@ -208,20 +293,19 @@ const Navbar = () => {
             {/* Sun/Moon Icons */}
             {isDarkMode ? (
               <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-12 h-12"  
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 3v1.5M16.95 7.05l1.06 1.06M21 12h-1.5M16.95 16.95l-1.06 1.06M12 21v-1.5M7.05 16.95l-1.06-1.06M3 12h1.5M7.05 7.05L8.11 8.11"
-              />
-            </svg>
-            
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-12 h-12"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3v1.5M16.95 7.05l1.06 1.06M21 12h-1.5M16.95 16.95l-1.06 1.06M12 21v-1.5M7.05 16.95l-1.06-1.06M3 12h1.5M7.05 7.05L8.11 8.11"
+                />
+              </svg>
             ) : (
               <svg
                 xmlns="http://www.w3.org/2000/svg"

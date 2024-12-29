@@ -1,12 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// Hall schema to store hall details
 export interface IHall extends Document {
-  name: string;  // Hall name
+  name: string;
 }
 
 const HallSchema: Schema = new Schema({
-  name: { type: String, required: true }, // Hall name
+  name: { type: String, required: true },
 });
 
-export default mongoose.models.Hall || mongoose.model<IHall>("Hall", HallSchema);
+// Explicitly specify the collection name as 'halls'
+export default mongoose.models.Hall || mongoose.model<IHall>("Hall", HallSchema, "halls");
+

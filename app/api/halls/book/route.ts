@@ -33,5 +33,9 @@ export async function POST(req: Request) {
 
   await booking.save();
 
-  return NextResponse.json({ message: `Hall ${hall.name} successfully booked for ${selectedDate}` });
+  // Return the success message along with the booking ID
+  return NextResponse.json({
+    message: `Hall ${hall.name} successfully booked for ${selectedDate}`,
+    bookingId: booking._id,  // Send the booking ID (MongoDB _id)
+  });
 }

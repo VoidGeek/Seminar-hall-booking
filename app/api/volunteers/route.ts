@@ -4,32 +4,33 @@ import Volunteer from "@/models/Volunteer";
 
 // Handle POST request for adding a new volunteer
 export async function POST(req: Request) {
-  const { name, event, attendance } = await req.json();
+  const { name, event, attendance, usn } = await req.json(); // Destructure the USN from the request body
+
+  if (!name || !event || !usn) {
+    return NextResponse.json({ error: "Missing required fields (name, event, usn)" }, { status: 400 });
+  }
 
   await dbConnect();
 
-  const newVolunteer = new Volunteer({ name, event, attendance });
+  const newVolunteer = new Volunteer({ name, event, attendance, usn });
   await newVolunteer.save();
 
   return NextResponse.json({ message: "Volunteer added successfully", volunteer: newVolunteer });
 }
 
-// Handle PATCH request for updating volunteer details (name, event, and attendance)
-
-// Handle PATCH request for updating volunteer details
+// Handle PATCH request for updating volunteer details (name, event, attendance, usn)
 export async function PATCH(req: Request) {
-  const { volunteerId, name, event } = await req.json();
+  const { volunteerId, name, event, usn, attendance } = await req.json();
 
-  await dbConnect();
-
-  // Check if all necessary fields are provided
-  if (!volunteerId || !name || !event) {
+  if (!volunteerId || !name || !event || !usn) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  await dbConnect();
+
   const updatedVolunteer = await Volunteer.findByIdAndUpdate(
     volunteerId,
-    { name, event },
+    { name, event, usn, attendance },
     { new: true }
   );
 
@@ -43,6 +44,10 @@ export async function PATCH(req: Request) {
 // Handle DELETE request for deleting a volunteer
 export async function DELETE(req: Request) {
   const { volunteerId } = await req.json();
+
+  if (!volunteerId) {
+    return NextResponse.json({ error: "Volunteer ID is required" }, { status: 400 });
+  }
 
   await dbConnect();
 
