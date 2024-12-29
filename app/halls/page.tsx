@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import HallCard from "@/app/components/HallCard"; // Import the HallCard component
+import HallCard from "@/components/HallCard"; // Import the HallCard component
 
 interface Hall {
   _id: string;
