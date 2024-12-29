@@ -8,11 +8,14 @@ export async function POST(req: Request) {
 
   await dbConnect();
 
-  // Hash the password using Argon2
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return NextResponse.json({ error: "User already exists." }, { status: 400 });
+  }
+
   const hashedPassword = await argon2.hash(password);
-
   const user = new User({ email, password: hashedPassword });
-  await user.save();
 
-  return NextResponse.json({ message: "User registered successfully" });
+  await user.save();
+  return NextResponse.json({ message: "User registered successfully." });
 }
