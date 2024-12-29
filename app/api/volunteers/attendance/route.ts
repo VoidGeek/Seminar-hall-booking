@@ -6,8 +6,19 @@ import { ObjectId } from "mongodb"; // Make sure you have mongodb installed
 // Helper to validate MongoDB ObjectId
 const isValidObjectId = (id: string): boolean => ObjectId.isValid(id);
 
+// Helper function to check authentication
+const isAuthenticated = (req: Request): boolean => {
+  const cookies = req.headers.get("cookie");
+  // Check if the 'auth=true' cookie is present, if no cookies are found return false
+  return cookies ? cookies.includes("auth=true") : false;
+};
+
 // GET: Fetch all volunteers and their attendance status
-export async function GET() {
+export async function GET(req: Request) {
+  if (!isAuthenticated(req)) {
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  }
+
   try {
     console.log("Starting to fetch volunteers...");
 
@@ -32,9 +43,12 @@ export async function GET() {
   }
 }
 
-
 // POST: Mark attendance for a specific volunteer
 export async function POST(req: Request) {
+  if (!isAuthenticated(req)) {
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const { volunteerId } = body;

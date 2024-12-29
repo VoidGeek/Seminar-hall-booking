@@ -13,6 +13,26 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false); // State to track scroll position
   const router = useRouter();
 
+  // Persist authentication state and theme state across refresh
+  useEffect(() => {
+    // Persist isLoggedIn state
+    const authStatus = localStorage.getItem("isLoggedIn");
+    if (authStatus === "true") {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+
+    // Persist theme state
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      toggleTheme();  // Update internal theme state if needed
+    } else {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  }, [setIsLoggedIn, toggleTheme]);
+
   const handleLogout = async () => {
     const response = await fetch("/api/auth/logout", {
       method: "POST",
@@ -20,6 +40,7 @@ const Navbar = () => {
 
     if (response.ok) {
       setIsLoggedIn(false);
+      localStorage.setItem("isLoggedIn", "false"); // Update localStorage on logout
       router.push("/login");
     } else {
       alert("Logout failed. Please try again.");
@@ -55,6 +76,7 @@ const Navbar = () => {
       // Update the theme after animation ends
       document.documentElement.setAttribute("data-theme", newTheme);
       toggleTheme(); // Update internal theme state
+      localStorage.setItem("theme", newTheme); // Save the theme to localStorage
       document.body.classList.remove("theme-reveal"); // Remove animation class
     }, 600); // Matches animation duration
   };
